@@ -1,8 +1,9 @@
 // Copyright Gabriel Alabi
 
-
+#include "CollisionQueryParams.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "Engine/EngineTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "Math/Color.h"
 #include "Grabber.h"
@@ -44,18 +45,13 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		OUT PlayerViewpointRotation
 	);
 
-	//logging to viewpoint every click
-	UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"),
-		*PlayerViewpointLocation.ToString(), *PlayerViewpointRotation.ToString()
-	);
-
 	//draw a line from player showing the reach
-	FVector LineTraceEnd = PlayerViewpointLocation + FVector(0.f, 0.f, Reach);
+	FVector LineTraceEnd = PlayerViewpointLocation + (PlayerViewpointRotation.Vector() * Reach);
 
 	DrawDebugLine(
 		GetWorld(), 
 		PlayerViewpointLocation, LineTraceEnd,
-		FColor::Red,
+		TraceColor,
 		false,
 		0.f,
 		0,
@@ -63,7 +59,29 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	);
 
 	//raycast out to a certain distance
+	FHitResult OutHit;
+	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
-	//see what it hits
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT OutHit,
+		PlayerViewpointLocation,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParams
+	);
+	
+	AActor* ActorHit = OutHit.GetActor();
+
+	if (ActorHit)
+	{
+		TraceColor = FColor::Green;
+
+		//log out to test
+		UE_LOG(LogTemp, Error, TEXT("Actor: %s"), *ActorHit->GetName());
+	}
+	else
+	{
+		TraceColor = FColor::Red;
+	}
 }
 

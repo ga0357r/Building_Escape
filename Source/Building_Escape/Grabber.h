@@ -27,4 +27,5 @@ public:
 private:
 	//private fields
 	UPROPERTY(EditAnywhere) float Reach = 100.f;
+	FColor TraceColor = FColor::Red;
 };
