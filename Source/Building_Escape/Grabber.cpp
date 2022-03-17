@@ -10,6 +10,7 @@
 
 #define OUT
 
+#pragma region Constructor Definition
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
@@ -19,18 +20,39 @@ UGrabber::UGrabber()
 
 	// ...
 }
+#pragma endregion
 
-
+#pragma region Begin Play Definition
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	UE_LOG(LogTemp, Warning, TEXT("You can interact with objects"));
+	PhysicsHandleComponent = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandleComponent)
+	{
+		//physics handle is found
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
+	}
+
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent)
+	{
+		//Input Component is found
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Drop);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s has no Input Component attached"), *GetOwner()->GetName());
+	}
 }
+#pragma endregion
 
-
+#pragma region Tick Definition
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -77,11 +99,24 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		TraceColor = FColor::Green;
 
 		//log out to test
-		UE_LOG(LogTemp, Error, TEXT("Actor: %s"), *ActorHit->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *ActorHit->GetName());
 	}
 	else
 	{
 		TraceColor = FColor::Red;
 	}
 }
+#pragma endregion
+
+#pragma region Private Methods
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grabber Pressed"));	
+}
+
+void UGrabber::Drop()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grabber Released"));
+}
+#pragma endregion
 
