@@ -13,37 +13,40 @@ class BUILDING_ESCAPE_API UGrabber : public UActorComponent
 {
 	GENERATED_BODY()
 
-#pragma region Constructor
 public:
+#pragma region Constructor
 	// Sets default values for this component's properties
 	UGrabber();
 #pragma endregion
 
-#pragma region Begin Play
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-#pragma endregion
-
 #pragma region Tick
-public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 #pragma endregion
 
-#pragma region Private Fields
+protected:
+#pragma region Begin Play
+	// Called when the game starts
+	virtual void BeginPlay() override;
+#pragma endregion
+
 private:
-	//private fields
-	UPROPERTY(EditAnywhere) float Reach = 100.f;
-	FColor TraceColor = FColor::Red;
+#pragma region Private Fields
 	UPhysicsHandleComponent* PhysicsHandleComponent = nullptr;
 	UInputComponent* InputComponent = nullptr;
 #pragma endregion
 
-#pragma region Private Methods
-private:
-	void Grab();
-	void Drop();
+#pragma region Private Serialized Fields
+	UPROPERTY(EditAnywhere) float Reach = 100.f;
 #pragma endregion
 
+#pragma region Private Methods
+	void Grab();
+	void Drop();
+	void FindPhysicsHandle();
+	void BindGrabInput();
+	FHitResult ReturnPhysicsBodyActor() const;
+	FVector CalculateRaycastReach();
+	FPlayerViewPoint GetPlayerViewPoint();
+#pragma endregion
 };
