@@ -7,8 +7,6 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Math/Color.h"
-#include "PlayerViewPoint.h"
-//#include <Building_Escape/PlayerViewPoint.h>
 
 #define OUT
 
@@ -38,14 +36,11 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//calculating the end point of the raycast
-	FVector LineTraceEnd = CalculateRaycastReach();
-
 	//if the physics handle is attached
 	if (PhysicsHandleComponent->GrabbedComponent)
 	{
 		//move the object we are holding
-		PhysicsHandleComponent->SetTargetLocation(LineTraceEnd);
+		PhysicsHandleComponent->SetTargetLocation(CalculatePlayerReach());
 	}
 }
 #pragma endregion
@@ -53,26 +48,18 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 #pragma region Private Methods
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grabber Pressed"));
-
-	//calculating the end point of the raycast
-	FVector LineTraceEnd = CalculateRaycastReach();
-
-	//only raycast when key is pressed and try and reach any actor with a physics body collision channel set
 	FHitResult PhysicsBodyActor = ReturnPhysicsBodyActor();
 	UPrimitiveComponent* ComponentToGrab = PhysicsBodyActor.GetComponent();
 
 	if (PhysicsBodyActor.GetActor())
 	{
-		//if we hit something then attach the physics handle
-		PhysicsHandleComponent->GrabComponentAtLocation(ComponentToGrab, NAME_None, LineTraceEnd);
+		//if we hit something then attach the physics handle at the end point of the raycast
+		PhysicsHandleComponent->GrabComponentAtLocation(ComponentToGrab, NAME_None, CalculatePlayerReach());
 	}
 }
 
 void UGrabber::Drop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grabber Released"));
-
 	if (!PhysicsHandleComponent->GrabbedComponent)
 	{
 		return;
@@ -84,11 +71,7 @@ void UGrabber::Drop()
 void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandleComponent = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandleComponent)
-	{
-		//physics handle is found
-	}
-	else
+	if (PhysicsHandleComponent == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
 	}
@@ -110,20 +93,15 @@ void UGrabber::BindGrabInput()
 }
 
 FHitResult UGrabber::ReturnPhysicsBodyActor() const
-{
-	FPlayerViewPoint PlayerViewPoint = GetPlayerViewPoint();
-	
-	//calculating the end point of the raycast
-	FVector LineTraceEnd = CalculateRaycastReach();
-
+{	
 	//raycast out to a certain distance
 	FHitResult OutHit;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT OutHit,
-		PlayerViewPoint.PlayerViewpointLocation,
-		LineTraceEnd,
+		GetPlayerPosition(),
+		CalculatePlayerReach(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
@@ -139,18 +117,24 @@ FHitResult UGrabber::ReturnPhysicsBodyActor() const
 	return OutHit;
 }
 
-FVector UGrabber::CalculateRaycastReach()
+FVector UGrabber::CalculatePlayerReach() const
 {
-	FPlayerViewPoint PlayerViewPoint = GetPlayerViewPoint();
-	FVector LineTraceEnd = PlayerViewPoint.PlayerViewpointLocation + (PlayerViewPoint.PlayerViewpointRotation.Vector() * Reach);
-	return LineTraceEnd;
+	FVector PlayerLocation = FVector::ZeroVector;
+	FRotator PlayerRotation = FRotator::ZeroRotator;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerLocation, OUT PlayerRotation);
+
+	return PlayerLocation + (PlayerRotation.Vector() * Reach);
 }
 
-FPlayerViewPoint UGrabber::GetPlayerViewPoint()
+FVector UGrabber::GetPlayerPosition() const
 {
-	FPlayerViewPoint PlayerViewPoint;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerViewPoint.PlayerViewpointLocation, OUT PlayerViewPoint.PlayerViewpointRotation);
-	return PlayerViewPoint;
+	FVector PlayerLocation = FVector::ZeroVector;
+	FRotator PlayerRotation = FRotator::ZeroRotator;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerLocation, OUT PlayerRotation);
+
+	return PlayerLocation;
 }
 #pragma endregion
 

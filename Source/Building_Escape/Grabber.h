@@ -46,7 +46,7 @@ private:
 	void FindPhysicsHandle();
 	void BindGrabInput();
 	FHitResult ReturnPhysicsBodyActor() const;
-	FVector CalculateRaycastReach();
-	FPlayerViewPoint GetPlayerViewPoint();
+	FVector CalculatePlayerReach() const;
+	FVector GetPlayerPosition() const;
 #pragma endregion
 };

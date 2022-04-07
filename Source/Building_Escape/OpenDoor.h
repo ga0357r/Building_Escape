@@ -27,11 +27,11 @@ public:
 
 private:
 #pragma region Private Variables
-	float initialYaw;
-	float currentYaw;
+	float initialYaw = 0.f;
+	float currentYaw = 0.f;
 	float doorLastOpened = 0.f;
 	float targetYaw = 90.f;
-	AActor* doorOpener;
+	AActor* doorOpener = nullptr;
 #pragma endregion
 
 #pragma region Private Serialized Variables
