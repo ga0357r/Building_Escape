@@ -36,6 +36,12 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!PhysicsHandleComponent) 
+	{ 
+		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
+		return; 
+	}
+
 	//if the physics handle is attached
 	if (PhysicsHandleComponent->GrabbedComponent)
 	{
@@ -45,23 +51,30 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 }
 #pragma endregion
 
-#pragma region Private Methods
+#pragma region Private Method Definitions
 void UGrabber::Grab()
 {
 	FHitResult PhysicsBodyActor = ReturnPhysicsBodyActor();
 	UPrimitiveComponent* ComponentToGrab = PhysicsBodyActor.GetComponent();
+	AActor* ActorHit = PhysicsBodyActor.GetActor();
 
-	if (PhysicsBodyActor.GetActor())
+	if (ActorHit)
 	{
-		//if we hit something then attach the physics handle at the end point of the raycast
+		if (!PhysicsHandleComponent) 
+		{ 
+			UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
+			return; 
+		}
+
 		PhysicsHandleComponent->GrabComponentAtLocation(ComponentToGrab, NAME_None, CalculatePlayerReach());
 	}
 }
 
 void UGrabber::Drop()
 {
-	if (!PhysicsHandleComponent->GrabbedComponent)
+	if (!PhysicsHandleComponent)
 	{
+		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
 		return;
 	}
 
@@ -71,6 +84,7 @@ void UGrabber::Drop()
 void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandleComponent = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+
 	if (PhysicsHandleComponent == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
@@ -80,9 +94,9 @@ void UGrabber::FindPhysicsHandle()
 void UGrabber::BindGrabInput()
 {
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+
 	if (InputComponent)
 	{
-		//Input Component is found
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Drop);
 	}
@@ -98,7 +112,8 @@ FHitResult UGrabber::ReturnPhysicsBodyActor() const
 	FHitResult OutHit;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
-	GetWorld()->LineTraceSingleByObjectType(
+	GetWorld()->LineTraceSingleByObjectType
+	(
 		OUT OutHit,
 		GetPlayerPosition(),
 		CalculatePlayerReach(),
