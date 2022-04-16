@@ -36,6 +36,10 @@ private:
 	float currentYaw = 0.f;
 	float doorLastOpened = 0.f;
 	float targetYaw = 90.f;
+
+	//tracks whether the sound has been played
+	bool bCloseDoorSoundPlayed = false;
+	bool bOpenDoorSoundPlayed = true;
 #pragma endregion
 
 #pragma region Private Serialized Variables
@@ -44,11 +48,14 @@ private:
 	UPROPERTY(EditAnywhere) float DoorCloseSpeed = 0.9f;
 	UPROPERTY(EditAnywhere) ATriggerVolume* PressurePlate = nullptr;
 	UPROPERTY(EditAnywhere) float RequiredMass = 50.f;
+	UPROPERTY(EditAnywhere) UAudioComponent* AudioComponent = nullptr;
 #pragma endregion
 
 #pragma region Private Methods
 	void Open(float deltaTime);
 	void Close(float deltaTime);
 	float TotalMassOfActors() const;
+	void FindAudioComponent();
+	void PlayDoorSound(bool bIsOpening);
 #pragma endregion
 };

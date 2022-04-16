@@ -2,6 +2,7 @@
 
 
 #include "OpenDoor.h"
+#include "Components/AudioComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
@@ -26,6 +27,7 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	FindAudioComponent();
 	initialYaw = GetOwner()->GetActorRotation().Yaw;
 	currentYaw = initialYaw;
 	targetYaw += currentYaw;
@@ -61,6 +63,7 @@ void UOpenDoor::Open(float deltaTime)
 	FRotator rotation = GetOwner()->GetActorRotation();
 	rotation.Yaw = currentYaw;
 	GetOwner()->SetActorRotation(rotation);
+	PlayDoorSound(true);
 }
 
 void UOpenDoor::Close(float deltaTime)
@@ -69,6 +72,7 @@ void UOpenDoor::Close(float deltaTime)
 	FRotator rotation = GetOwner()->GetActorRotation();
 	rotation.Yaw = currentYaw;
 	GetOwner()->SetActorRotation(rotation);
+	PlayDoorSound(false);
 }
 
 float UOpenDoor::TotalMassOfActors() const
@@ -90,5 +94,43 @@ float UOpenDoor::TotalMassOfActors() const
 	}
 
 	return TotalMass;
+}
+
+void UOpenDoor::FindAudioComponent()
+{
+	AudioComponent = GetOwner()->FindComponentByClass<UAudioComponent>();
+
+	if (!AudioComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s is missing AudioComponent"), *GetOwner()->GetName());
+		return;
+	}
+}
+
+void UOpenDoor::PlayDoorSound(bool bIsOpening)
+{
+	if (bIsOpening)
+	{
+		bCloseDoorSoundPlayed = false;
+		if (!AudioComponent) { return; }
+
+		if (!bOpenDoorSoundPlayed)
+		{
+			AudioComponent->Play();
+			bOpenDoorSoundPlayed = true;
+		}
+	}
+
+	else
+	{
+		bOpenDoorSoundPlayed = false;
+		if (!AudioComponent) { return; }
+
+		if (!bCloseDoorSoundPlayed)
+		{
+			AudioComponent->Play();
+			bCloseDoorSoundPlayed = true;
+		}
+	}
 }
 #pragma endregion

@@ -32,8 +32,8 @@ protected:
 
 private:
 #pragma region Private Fields
-	UPhysicsHandleComponent* PhysicsHandleComponent = nullptr;
-	UInputComponent* InputComponent = nullptr;
+	UPROPERTY() UPhysicsHandleComponent* PhysicsHandleComponent = nullptr;
+	UPROPERTY() UInputComponent* InputComponent = nullptr;
 #pragma endregion
 
 #pragma region Private Serialized Fields
