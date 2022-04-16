@@ -35,7 +35,6 @@ private:
 	float initialYaw = 0.f;
 	float currentYaw = 0.f;
 	float doorLastOpened = 0.f;
-	float targetYaw = 90.f;
 
 	//tracks whether the sound has been played
 	bool bCloseDoorSoundPlayed = false;
@@ -46,6 +45,7 @@ private:
 	UPROPERTY(EditAnywhere) float DoorCloseDelay = 0.25f;
 	UPROPERTY(EditAnywhere) float DoorOpenSpeed = 0.65f;
 	UPROPERTY(EditAnywhere) float DoorCloseSpeed = 0.9f;
+	UPROPERTY(EditAnywhere) float targetYaw = 90.f;
 	UPROPERTY(EditAnywhere) ATriggerVolume* PressurePlate = nullptr;
 	UPROPERTY(EditAnywhere) float RequiredMass = 50.f;
 	UPROPERTY(EditAnywhere) UAudioComponent* AudioComponent = nullptr;
