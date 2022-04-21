@@ -33,7 +33,7 @@ protected:
 private:
 #pragma region Private Fields
 	UPROPERTY() UPhysicsHandleComponent* PhysicsHandleComponent = nullptr;
-	UPROPERTY() UInputComponent* InputComponent = nullptr;
+	UPROPERTY() UInputComponent* InputComponent = nullptr; 
 #pragma endregion
 
 #pragma region Private Serialized Fields
@@ -48,5 +48,8 @@ private:
 	FHitResult ReturnPhysicsBodyActor() const;
 	FVector CalculatePlayerReach() const;
 	FVector GetPlayerPosition() const;
+	bool IsActorRotationLocked(const AActor* Actor);
+	void LockActorRotation(const AActor* Actor);
+	void UnlockActorRotation(const AActor* Actor);
 #pragma endregion
 };

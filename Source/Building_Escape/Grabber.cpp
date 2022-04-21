@@ -58,6 +58,7 @@ void UGrabber::Grab()
 	UPrimitiveComponent* ComponentToGrab = PhysicsBodyActor.GetComponent();
 	AActor* ActorHit = PhysicsBodyActor.GetActor();
 
+
 	if (ActorHit)
 	{
 		if (!PhysicsHandleComponent) 
@@ -67,6 +68,7 @@ void UGrabber::Grab()
 		}
 
 		PhysicsHandleComponent->GrabComponentAtLocation(ComponentToGrab, NAME_None, CalculatePlayerReach());
+		LockActorRotation(ActorHit);
 	}
 }
 
@@ -76,6 +78,11 @@ void UGrabber::Drop()
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s has no UPhysicsHandleComponent attached"), *GetOwner()->GetName());
 		return;
+	}
+
+	if (PhysicsHandleComponent->GrabbedComponent)
+	{
+		UnlockActorRotation(PhysicsHandleComponent->GrabbedComponent->GetOwner());
 	}
 
 	PhysicsHandleComponent->ReleaseComponent();
@@ -150,6 +157,33 @@ FVector UGrabber::GetPlayerPosition() const
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerLocation, OUT PlayerRotation);
 
 	return PlayerLocation;
+}
+
+bool UGrabber::IsActorRotationLocked(const AActor* Actor)
+{
+	if (Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockRotation == true) 
+	{
+		return true; 
+	}
+
+	else 
+	{
+		return false;
+	}
+}
+
+void UGrabber::LockActorRotation(const AActor* Actor)
+{
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockXRotation = true;
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockYRotation = true;
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockZRotation = true;
+}
+
+void UGrabber::UnlockActorRotation(const AActor* Actor)
+{
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockXRotation = false;
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockYRotation = false;
+	Actor->FindComponentByClass<UPrimitiveComponent>()->BodyInstance.bLockZRotation = false;
 }
 #pragma endregion
 
