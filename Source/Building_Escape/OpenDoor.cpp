@@ -30,7 +30,6 @@ void UOpenDoor::BeginPlay()
 	FindAudioComponent();
 	initialYaw = GetOwner()->GetActorRotation().Yaw;
 	currentYaw = initialYaw;
-	//TargetYaw += currentYaw;
 }
 #pragma endregion
 
