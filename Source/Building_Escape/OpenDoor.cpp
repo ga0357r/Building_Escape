@@ -30,7 +30,7 @@ void UOpenDoor::BeginPlay()
 	FindAudioComponent();
 	initialYaw = GetOwner()->GetActorRotation().Yaw;
 	currentYaw = initialYaw;
-	targetYaw += currentYaw;
+	//TargetYaw += currentYaw;
 }
 #pragma endregion
 
@@ -59,7 +59,7 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 #pragma region Private Method Definitions
 void UOpenDoor::Open(float deltaTime)
 {
-	currentYaw = FMath::Lerp(currentYaw, targetYaw, DoorOpenSpeed * deltaTime);
+	currentYaw = FMath::Lerp(currentYaw, TargetYaw, DoorOpenSpeed * deltaTime);
 	FRotator rotation = GetOwner()->GetActorRotation();
 	rotation.Yaw = currentYaw;
 	GetOwner()->SetActorRotation(rotation);
